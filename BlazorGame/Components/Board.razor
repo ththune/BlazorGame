@@ -1,0 +1,103 @@
+﻿@using System.Timers
+@using BlazorGame.GameLogic
+
+@code {
+    [Parameter] public int Rows { get; set; } = 30;
+    [Parameter] public int Columns { get; set; } = 30;
+    private readonly BoardLogic _board;
+    private readonly SnakeLogic _snake;
+    private Timer? _timer;
+    private ElementReference _boardRef;
+    private bool _hasFocused;
+
+    public Board()
+    {
+        _board = new BoardLogic(Rows, Columns);
+        _snake = new SnakeLogic(Rows / 2, Columns / 2);
+    }
+
+    private bool IsSnakeCell(int row, int column) =>
+        _snake.Body.Any(body => body.Row == row && body.Column == column);
+
+    private void MoveSnake()
+    {
+        InvokeAsync(() =>
+        {
+            var grow = new Random().Next(10) < 2; // 20% chance to grow
+            _snake.Move(grow);
+            StateHasChanged();
+        });
+    }
+
+    private void HandleKeyDown(KeyboardEventArgs e)
+    {
+        switch (e)
+        {
+            case { Key: "ArrowUp" or "w" or "W" }:
+            {
+                if (_snake.CurrentDirection != Direction.Down)
+                    _snake.CurrentDirection = Direction.Up;
+                break;
+            }
+            case { Key: "ArrowDown" or "s" or "S" }:
+            {
+                if (_snake.CurrentDirection != Direction.Up)
+                    _snake.CurrentDirection = Direction.Down;
+                break;
+            }
+            case { Key: "ArrowLeft" or "a" or "A" }:
+            {
+                if (_snake.CurrentDirection != Direction.Right)
+                    _snake.CurrentDirection = Direction.Left;
+                break;
+            }
+            case { Key: "ArrowRight" or "d" or "D" }:
+            {
+                if (_snake.CurrentDirection != Direction.Left)
+                    _snake.CurrentDirection = Direction.Right;
+                break;
+            }
+        }
+    }
+
+    // Move when arrow keys are pressed
+    protected override void OnInitialized()
+    {
+        _timer = new Timer(200);
+        _timer.Elapsed += (sender, e) => MoveSnake();
+
+        _timer.Start();
+        base.OnInitialized();
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!_hasFocused)
+        {
+            _hasFocused = true;
+            await _boardRef.FocusAsync();
+        }
+    }
+
+
+    public void Dispose()
+    {
+        _timer?.Stop();
+        _timer?.Dispose();
+    }
+
+}
+
+<div class="board" style="--rows: @Rows; --columns: @Columns;" tabindex="0" @onkeydown="HandleKeyDown" @ref="_boardRef">
+    @for (var row = 0; row < _board.Rows; row++)
+    {
+        <div class="board-row">
+            @for (var column = 0; column < _board.Columns; column++)
+            {
+                var snakeClass = IsSnakeCell(row, column) ? "snake-cell" : "";
+                <div class="board-cell @snakeClass"></div>
+            }
+        </div>
+    }
+</div> 
+
