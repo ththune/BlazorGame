@@ -43,7 +43,6 @@ public class BoardLogic
         return emptyCells;
     }
 
-    //TODO: Should use Position intstead of (row, column)...
     /// <summary>
     ///  Check if the snake occupies the specified cell.
     /// </summary>
