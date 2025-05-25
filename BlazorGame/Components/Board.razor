@@ -18,7 +18,7 @@
     private SnakeLogic _snake = null!;
 
     //* The position of the food on the board */
-    private (int Row, int Column) _foodPosition;
+    private Position _foodPosition;
 
     //* Timer to control the snake's movement */
     private Timer? _timer;
@@ -108,8 +108,8 @@
         <div class="board-row">
             @for (var column = 0; column < _board.Columns; column++)
             {
-                var snakeClass = BoardLogic.IsSnakeCell(row, column, _snake.Body) ? "snake-cell" : "";
-                var foodClass = BoardLogic.IsFoodCell(row, column, _foodPosition) ? "food-cell" : "";
+                var snakeClass = BoardLogic.IsSnakeCell(new Position(row, column), _snake.Body) ? "snake-cell" : "";
+                var foodClass = BoardLogic.IsFoodCell(new Position(row, column), _foodPosition) ? "food-cell" : "";
                 <div class="board-cell @snakeClass @foodClass"></div>
             }
         </div>

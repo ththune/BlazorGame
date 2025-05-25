@@ -26,14 +26,17 @@ public class BoardLogic
     /// </summary>
     /// <param name="snakeBody"></param>
     /// <returns></returns>
-    public List<(int Row, int Column)> GetEmptyCells(LinkedList<(int Row, int Column)> snakeBody)
+    public List<Position> GetEmptyCells(LinkedList<Position> snakeBody)
     {
-        var emptyCells = new List<(int rows, int columns)>();
+        var emptyCells = new List<Position>();
         for (var row = 0; row < Rows; row++)
         {
             for (var column = 0; column < Columns; column++)
             {
-                if (!IsSnakeCell(row, column, snakeBody)) emptyCells.Add((row, column));
+                if (!IsSnakeCell(new Position(row, column), snakeBody))
+                {
+                    emptyCells.Add(new Position(row, column));
+                }
             }
         }
 
@@ -44,21 +47,18 @@ public class BoardLogic
     /// <summary>
     ///  Check if the snake occupies the specified cell.
     /// </summary>
-    /// <param name="row"></param>
-    /// <param name="column"></param>
+    /// <param name="position"></param>
     /// <param name="snakeBody"></param>
     /// <returns></returns>
-    public static bool IsSnakeCell(int row, int column, IEnumerable<(int Row, int Column)> snakeBody) =>
-        snakeBody.Any(cell => cell.Row == row && cell.Column == column);
+    public static bool IsSnakeCell(Position position, IEnumerable<Position> snakeBody) =>
+        snakeBody.Any(cell => cell.Equals(position));
 
 
     /// <summary>
     /// Check if food occupies the specified cell.
     /// </summary>
-    /// <param name="row"></param>
-    /// <param name="column"></param>
+    /// <param name="position"></param>
     /// <param name="foodPosition"></param>
     /// <returns></returns>
-    public static bool IsFoodCell(int row, int column, (int Row, int Column) foodPosition) =>
-        foodPosition.Row == row && foodPosition.Column == column;
+    public static bool IsFoodCell(Position position, Position foodPosition) => foodPosition.Equals(position);
 }

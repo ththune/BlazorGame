@@ -3,17 +3,17 @@
 public class SnakeLogic
 {
     /// <summary> Represents the body of the snake as a linked list of (Row, Column) tuples. </summary>
-    public LinkedList<(int Row, int Column)> Body { get; } = [];
+    public LinkedList<Position> Body { get; } = [];
 
     /// <summary> Gets the current head position of the snake. </summary>
-    public (int Row, int Column) Head =>
+    public Position Head =>
         Body.First?.Value ?? throw new InvalidOperationException("Snake body is empty.");
 
     /// <summary> The current direction of the snake. </summary>
     public Direction CurrentDirection { get; set; } = Direction.Right;
 
     /// <summary> Constructor </summary>
-    public SnakeLogic(int startRow, int startColumn) => Body.AddFirst((startRow, startColumn));
+    public SnakeLogic(int startRow, int startColumn) => Body.AddFirst(new Position(startRow, startColumn));
 
     /// <summary>
     ///  Moves the snake in the current direction.
@@ -30,12 +30,12 @@ public class SnakeLogic
 
         // Calculate the new head position based on the current direction
         // and add it to the front of the body
-        (int Row, int Column) newHead = CurrentDirection switch
+        Position newHead = CurrentDirection switch
         {
-            Direction.Up => (head.Row - 1, head.Column),
-            Direction.Down => (head.Row + 1, head.Column),
-            Direction.Left => (head.Row, head.Column - 1),
-            Direction.Right => (head.Row, head.Column + 1),
+            Direction.Up => new Position(head.Row -1, head.Column),
+            Direction.Down => new Position(head.Row + 1, head.Column),
+            Direction.Left => new Position(head.Row, head.Column - 1),
+            Direction.Right => new Position(head.Row, head.Column + 1),
             _ => throw new ArgumentOutOfRangeException(nameof(CurrentDirection), CurrentDirection, null)
         };
 
