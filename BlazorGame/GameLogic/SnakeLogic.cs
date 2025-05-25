@@ -7,6 +7,7 @@ public class SnakeLogic
 
     public SnakeLogic(int startRow, int startColumn) => Body.AddFirst((startRow, startColumn));
 
+    // Move the snake one step in the current direction.
     public void Move(bool grow = false)
     {
         if (Body.First == null) throw new InvalidOperationException("Snake body is empty.");
@@ -22,13 +23,31 @@ public class SnakeLogic
             Direction.Down => (head.Row + 1, head.Column),
             Direction.Left => (head.Row, head.Column - 1),
             Direction.Right => (head.Row, head.Column + 1),
-            _ => throw new ArgumentOutOfRangeException(nameof(CurrentDirection))
+            _ => throw new ArgumentOutOfRangeException(nameof(CurrentDirection), CurrentDirection, null)
         };
 
         Body.AddFirst(newHead);
 
         // If not growing, remove the last segment of the snake, indicating it has moved
         if (!grow) Body.RemoveLast();
+    }
+
+    // Change the snake's direction if the new direction is valid
+    public void ChangeDirection(Direction newDirection)
+    {
+        // Ensure the new direction is not directly opposite to the current direction
+        var canChangeDirection = newDirection switch
+        {
+            Direction.Up => CurrentDirection != Direction.Down,
+            Direction.Down => CurrentDirection != Direction.Up,
+            Direction.Left => CurrentDirection != Direction.Right,
+            Direction.Right => CurrentDirection != Direction.Left,
+            _ => throw new ArgumentOutOfRangeException(nameof(newDirection), newDirection, null)
+        };
+
+        if (!canChangeDirection) return;
+
+        CurrentDirection = newDirection;
     }
 }
 
