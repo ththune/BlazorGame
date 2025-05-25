@@ -1,4 +1,5 @@
-﻿@using System.Timers
+﻿@using System.Diagnostics
+@using System.Timers
 @using BlazorGame.GameLogic
 
 @implements IDisposable
@@ -26,11 +27,14 @@
     //* Reference to the board element for focus management */
     private ElementReference _boardRef;
 
-    //* Flag to check if the board has been focused */
-    private bool _hasFocused;
+    //* Check if the board is focused */
+    private bool _focusBoard;
 
     //* Flag to indicate if the game is over */
     private bool _isGameOver;
+
+    //* Stopwatch to measure the game duration */
+    private Stopwatch? _stopwatch;
 
     //* Random number generator for food spawning */
     private static readonly Random Random = new();
@@ -39,14 +43,60 @@
     protected override void OnInitialized()
     {
         _board = new BoardLogic(Rows, Columns);
-        _snake = new SnakeLogic(Rows / 2, Columns / 2);
-        SpawnFood();
 
+        StartGame();
+
+        base.OnInitialized();
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (_focusBoard)
+        {
+            _focusBoard = false;
+            await _boardRef.FocusAsync();
+        }
+    }
+
+    //* Dispose of the timer when the component is disposed */
+    public void Dispose()
+    {
+        _timer?.Stop();
+        _timer?.Dispose();
+    }
+
+    //* Start a new game of Snake */
+    private void StartGame()
+    {
+        _isGameOver = false;
+
+        // Initialize the snake in the center of the board
+        _snake = new SnakeLogic(Rows / 2, Columns / 2);
+
+        // Start the timer that moves the snake every 200 milliseconds
         _timer = new Timer(200);
         _timer.Elapsed += (_, _) => MoveSnake();
-
         _timer.Start();
-        base.OnInitialized();
+
+        // Make the board focused to capture keyboard input
+        _focusBoard = true;
+
+        // Initialize the stopwatch to track game duration
+        _stopwatch = new Stopwatch();
+        _stopwatch.Start();
+
+        SpawnFood();
+
+        StateHasChanged();
+    }
+
+    //* End the game of Snake and display the game over message */
+    private void EndGame()
+    {
+        _isGameOver = true;
+        _timer?.Stop();
+        _stopwatch?.Stop();
+        StateHasChanged();
     }
 
     //* Spawn food at a random empty cell on the board */
@@ -66,13 +116,7 @@
             _snake.Move(grow: hasEatenFood);
 
             // If the snake has collided with itself or the walls, stop the game
-            if (_board.CheckCollision(_snake.Body))
-            {
-                _timer?.Stop();
-                _isGameOver = true;
-                StateHasChanged();
-                return;
-            }
+            if (_board.CheckCollision(_snake.Body)) EndGame();
 
             // If the snake has eaten food, spawn new food
             if (hasEatenFood) SpawnFood();
@@ -96,22 +140,6 @@
         if (newDirection.HasValue) _snake.ChangeDirection(newDirection.Value);
     }
 
-    //* Focus the board element after the first render to enable keyboard input */
-    protected override async Task OnAfterRenderAsync(bool firstRender)
-    {
-        if (!_hasFocused)
-        {
-            _hasFocused = true;
-            await _boardRef.FocusAsync();
-        }
-    }
-
-    //* Dispose of the timer when the component is disposed */
-    public void Dispose()
-    {
-        _timer?.Stop();
-        _timer?.Dispose();
-    }
 
 }
 
@@ -127,10 +155,11 @@
             }
         </div>
     }
-</div> 
+</div>
 
 @if (_isGameOver)
 {
     <div style="color: red">Game over!</div>
+    <button @onclick="StartGame">Start new game</button>
 }
 
