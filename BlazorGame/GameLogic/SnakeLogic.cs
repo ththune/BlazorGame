@@ -2,12 +2,25 @@
 
 public class SnakeLogic
 {
+    /// <summary> Represents the body of the snake as a linked list of (Row, Column) tuples. </summary>
     public LinkedList<(int Row, int Column)> Body { get; } = [];
+
+    /// <summary> Gets the current head position of the snake. </summary>
+    public (int Row, int Column) Head =>
+        Body.First?.Value ?? throw new InvalidOperationException("Snake body is empty.");
+
+    /// <summary> The current direction of the snake. </summary>
     public Direction CurrentDirection { get; set; } = Direction.Right;
 
+    /// <summary> Constructor </summary>
     public SnakeLogic(int startRow, int startColumn) => Body.AddFirst((startRow, startColumn));
 
-    // Move the snake one step in the current direction.
+    /// <summary>
+    ///  Moves the snake in the current direction.
+    /// </summary>
+    /// <param name="grow">True if the snake has eated food</param>
+    /// <exception cref="InvalidOperationException"></exception>
+    /// <exception cref="ArgumentOutOfRangeException"></exception>
     public void Move(bool grow = false)
     {
         if (Body.First == null) throw new InvalidOperationException("Snake body is empty.");
@@ -32,7 +45,11 @@ public class SnakeLogic
         if (!grow) Body.RemoveLast();
     }
 
-    // Change the snake's direction if the new direction is valid
+    /// <summary>
+    ///  Changes the direction of the snake.
+    /// </summary>
+    /// <param name="newDirection"></param>
+    /// <exception cref="ArgumentOutOfRangeException"></exception>
     public void ChangeDirection(Direction newDirection)
     {
         // Ensure the new direction is not directly opposite to the current direction
@@ -51,6 +68,7 @@ public class SnakeLogic
     }
 }
 
+/// <summary> Represents the possible directions the snake can move. </summary>
 public enum Direction
 {
     Up,

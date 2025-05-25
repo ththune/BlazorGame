@@ -8,6 +8,7 @@
     [Parameter] public int Columns { get; set; } = 30;
     private BoardLogic _board = null!;
     private SnakeLogic _snake = null!;
+    private (int Row, int Column) _foodPosition;
     private Timer? _timer;
     private ElementReference _boardRef;
     private bool _hasFocused;
@@ -19,6 +20,7 @@
     {
         _board = new BoardLogic(Rows, Columns);
         _snake = new SnakeLogic(Rows / 2, Columns / 2);
+        SpawnFood();
 
         _timer = new Timer(200);
         _timer.Elapsed += (_, _) => MoveSnake();
@@ -27,15 +29,43 @@
         base.OnInitialized();
     }
 
+    private void SpawnFood()
+    {
+        var emptyCells = GetEmptyCells();
+        _foodPosition = emptyCells[Random.Next(emptyCells.Count)];
+    }
+
+    private List<(int rows, int columns)> GetEmptyCells()
+    {
+        var emptyCells = new List<(int rows, int columns)>();
+        for (var row = 0; row < Rows; row++)
+        {
+            for (var column = 0; column < Columns; column++)
+            {
+                if (!IsSnakeCell(row, column)) emptyCells.Add((row, column));
+            }
+        }
+
+        return emptyCells;
+    }
+
+
     private bool IsSnakeCell(int row, int column) =>
         _snake.Body.Any(body => body.Row == row && body.Column == column);
+
+    private bool IsFoodCell(int row, int column) =>
+        _foodPosition.Row == row && _foodPosition.Column == column;
 
     private void MoveSnake()
     {
         InvokeAsync(() =>
         {
-            var grow = Random.Next(10) < 2; // 20% chance to grow
-            _snake.Move(grow);
+            // Check if the snake has eaten food
+            var hasEatenFood = _snake.Head.Row == _foodPosition.Row && _snake.Head.Column == _foodPosition.Column;
+            _snake.Move(grow: hasEatenFood);
+            // If the snake has eaten food, spawn new food
+            if (hasEatenFood) SpawnFood();
+
             StateHasChanged();
         });
     }
@@ -80,7 +110,8 @@
             @for (var column = 0; column < _board.Columns; column++)
             {
                 var snakeClass = IsSnakeCell(row, column) ? "snake-cell" : "";
-                <div class="board-cell @snakeClass"></div>
+                var foodClass = IsFoodCell(row, column) ? "food-cell" : "";
+                <div class="board-cell @snakeClass @foodClass"></div>
             }
         </div>
     }

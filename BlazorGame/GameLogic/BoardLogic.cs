@@ -2,29 +2,21 @@
 
 public class BoardLogic
 {
+    /// <summary> Represents the number of rows in the game board. </summary>
     public int Rows { get; set; }
+
+    /// <summary> Represents the number of columns in the game board. </summary>
     public int Columns { get; set; }
 
-    // Represents the game board as a 2D array of integers
-    public int[,] Cells { get; set; }
 
-    // Constructor
+    /// <summary>
+    ///  Initializes a new instance of the <see cref="BoardLogic"/> class with specified rows and columns.
+    /// </summary>
+    /// <param name="rows"></param>
+    /// <param name="columns"></param>
     public BoardLogic(int rows, int columns)
     {
         Rows = rows;
         Columns = columns;
-        Cells = new int[rows, columns];
-    }
-    
-    // Reset each cell to 0
-    public void Reset()
-    {
-        for (var row = 0; row < Rows; row++)
-        {
-            for (var column = 0; column < Columns; column++)
-            {
-                Cells[row, column] = 0;
-            }
-        }
     }
 }

@@ -20,3 +20,7 @@
 .snake-cell {
     background: #4caf50;
 }
+
+.food-cell {
+    background: #ff5722;
+}
