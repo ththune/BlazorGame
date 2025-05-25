@@ -49,32 +49,9 @@
     //* Spawn food at a random empty cell on the board */
     private void SpawnFood()
     {
-        var emptyCells = GetEmptyCells();
+        var emptyCells = _board.GetEmptyCells(_snake.Body);
         _foodPosition = emptyCells[Random.Next(emptyCells.Count)];
     }
-
-    //* Helper method to get a list of empty cells on the board */
-    private List<(int rows, int columns)> GetEmptyCells()
-    {
-        var emptyCells = new List<(int rows, int columns)>();
-        for (var row = 0; row < Rows; row++)
-        {
-            for (var column = 0; column < Columns; column++)
-            {
-                if (!IsSnakeCell(row, column)) emptyCells.Add((row, column));
-            }
-        }
-
-        return emptyCells;
-    }
-
-    //* Helper methods to check if a cell is occupied by the snake */
-    private bool IsSnakeCell(int row, int column) =>
-        _snake.Body.Any(body => body.Row == row && body.Column == column);
-
-    //* Helper method to check if a cell is occupied by food */
-    private bool IsFoodCell(int row, int column) =>
-        _foodPosition.Row == row && _foodPosition.Column == column;
 
     //* Move the snake and let it grow if it has eaten food */
     private void MoveSnake()
@@ -131,8 +108,8 @@
         <div class="board-row">
             @for (var column = 0; column < _board.Columns; column++)
             {
-                var snakeClass = IsSnakeCell(row, column) ? "snake-cell" : "";
-                var foodClass = IsFoodCell(row, column) ? "food-cell" : "";
+                var snakeClass = BoardLogic.IsSnakeCell(row, column, _snake.Body) ? "snake-cell" : "";
+                var foodClass = BoardLogic.IsFoodCell(row, column, _foodPosition) ? "food-cell" : "";
                 <div class="board-cell @snakeClass @foodClass"></div>
             }
         </div>
