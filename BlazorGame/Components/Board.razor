@@ -29,6 +29,9 @@
     //* Flag to check if the board has been focused */
     private bool _hasFocused;
 
+    //* Flag to indicate if the game is over */
+    private bool _isGameOver;
+
     //* Random number generator for food spawning */
     private static readonly Random Random = new();
 
@@ -61,6 +64,16 @@
             // Check if the snake has eaten food
             var hasEatenFood = _snake.Head.Row == _foodPosition.Row && _snake.Head.Column == _foodPosition.Column;
             _snake.Move(grow: hasEatenFood);
+
+            // If the snake has collided with itself or the walls, stop the game
+            if (_board.CheckCollision(_snake.Body))
+            {
+                _timer?.Stop();
+                _isGameOver = true;
+                StateHasChanged();
+                return;
+            }
+
             // If the snake has eaten food, spawn new food
             if (hasEatenFood) SpawnFood();
 
@@ -115,4 +128,9 @@
         </div>
     }
 </div> 
+
+@if (_isGameOver)
+{
+    <div style="color: red">Game over!</div>
+}
 

@@ -43,6 +43,27 @@ public class BoardLogic
         return emptyCells;
     }
 
+    public bool CheckCollision(LinkedList<Position> snakeBody)
+    {
+        if (snakeBody.First == null) throw new InvalidOperationException("Snake body is empty.");
+
+        var head = snakeBody.First.Value;
+
+        var isWallCollision = head switch
+        {
+            { Row: < 0 } => true,
+            { Row: var row } when row >= Rows => true,
+            { Column: < 0 } => true,
+            { Column: var column } when column >= Columns => true,
+            _ => false
+        };
+
+        // Check if the snake collides with the wall
+        // or if the snake collides with itself (ignoring the head)
+        return isWallCollision ||
+               snakeBody.Skip(1).Any(body => body.Equals(head));
+    }
+
     /// <summary>
     ///  Check if the snake occupies the specified cell.
     /// </summary>
