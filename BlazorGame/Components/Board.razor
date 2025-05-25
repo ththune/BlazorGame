@@ -4,18 +4,35 @@
 @implements IDisposable
 
 @code {
+
+    //* Number of rows on the board */
     [Parameter] public int Rows { get; set; } = 30;
+
+    //* Number of columns on the board */
     [Parameter] public int Columns { get; set; } = 30;
+
+    //* The board logic that handles the game state */
     private BoardLogic _board = null!;
+
+    //* The snake logic that handles the snake's movement and state */
     private SnakeLogic _snake = null!;
+
+    //* The position of the food on the board */
     private (int Row, int Column) _foodPosition;
+
+    //* Timer to control the snake's movement */
     private Timer? _timer;
+
+    //* Reference to the board element for focus management */
     private ElementReference _boardRef;
+
+    //* Flag to check if the board has been focused */
     private bool _hasFocused;
+
+    //* Random number generator for food spawning */
     private static readonly Random Random = new();
 
-
-    // Initialize this component
+    //* Initialize the game logic and start the timer */
     protected override void OnInitialized()
     {
         _board = new BoardLogic(Rows, Columns);
@@ -29,12 +46,14 @@
         base.OnInitialized();
     }
 
+    //* Spawn food at a random empty cell on the board */
     private void SpawnFood()
     {
         var emptyCells = GetEmptyCells();
         _foodPosition = emptyCells[Random.Next(emptyCells.Count)];
     }
 
+    //* Helper method to get a list of empty cells on the board */
     private List<(int rows, int columns)> GetEmptyCells()
     {
         var emptyCells = new List<(int rows, int columns)>();
@@ -49,13 +68,15 @@
         return emptyCells;
     }
 
-
+    //* Helper methods to check if a cell is occupied by the snake */
     private bool IsSnakeCell(int row, int column) =>
         _snake.Body.Any(body => body.Row == row && body.Column == column);
 
+    //* Helper method to check if a cell is occupied by food */
     private bool IsFoodCell(int row, int column) =>
         _foodPosition.Row == row && _foodPosition.Column == column;
 
+    //* Move the snake and let it grow if it has eaten food */
     private void MoveSnake()
     {
         InvokeAsync(() =>
@@ -70,6 +91,7 @@
         });
     }
 
+    //* Handle keyboard input to change the snake's direction */
     private void HandleKeyDown(KeyboardEventArgs e)
     {
         Direction? newDirection = e.Key switch
@@ -84,7 +106,7 @@
         if (newDirection.HasValue) _snake.ChangeDirection(newDirection.Value);
     }
 
-
+    //* Focus the board element after the first render to enable keyboard input */
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (!_hasFocused)
@@ -94,7 +116,7 @@
         }
     }
 
-
+    //* Dispose of the timer when the component is disposed */
     public void Dispose()
     {
         _timer?.Stop();
